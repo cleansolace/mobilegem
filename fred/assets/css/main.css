@@ -74,10 +74,9 @@ h2 {
 } */
 
 
-.none{
+.none {
   display: none;
 }
-
 
 
 
@@ -1064,8 +1063,52 @@ p {
   margin: 15px 0 0 0;
 }
 
+
+
+
+
+
+
+/* #image {
+  display: none;
+  position: absolute;
+  right: 10%;
+}
+
+#text:hover + #image {
+  display: block;
+} */
+
+
+.firstImage:hover:before {
+  background-image: url('https://cleansolace.github.io/mobilegem/fred/assets/img/services/ptg.jpg');
+  height: fit-content;
+  width: fit-content;
+}
+
+.secondImage:hover:before {
+  background-image: url("https://cleansolace.github.io/mobilegem/fred/assets/img/services/par.jpg");
+  height: fit-content;
+  width: fit-content;
+}
+
+.threeImage:hover:before {
+  background-image: url("https://cleansolace.github.io/mobilegem/fred/assets/img/services/vdg.jpg");
+  height: fit-content;
+  width: fit-content;
+}
+
+
+.fourImage:hover:before {
+  background-image: url("https://cleansolace.github.io/mobilegem/fred/assets/img/services/edt.jpg");
+  height: fit-content;
+  width: fit-content;
+}
+
+
+
+
 .services .service-item:hover:before {
-  background: #30318F;
   right: 0;
   top: 0;
   width: 100%;
