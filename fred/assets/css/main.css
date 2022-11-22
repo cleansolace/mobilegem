@@ -556,7 +556,7 @@ p {
     inset: 0;
     padding: 50px 0 10px 0;
     margin: 0;
-    background: rgba(0, 0, 0, 0.9);
+    background: #FFFFFF;
     overflow-y: auto;
     transition: 0.3s;
     z-index: 9998;
@@ -570,9 +570,11 @@ p {
     padding: 10px 20px;
     font-family: var(--font-primary);
     font-size: 13px;
-    text-transform: uppercase;
-    font-weight: 400;
-    color: rgba(255, 255, 255, 0.5);
+    text-transform: capitalize;
+    font-weight: bolder;
+    color: #000000;
+    margin-top: 40px;
+    margin-left: 100px;
     letter-spacing: 1px;
     white-space: nowrap;
     transition: 0.3s;
@@ -1082,27 +1084,27 @@ p {
 
 .firstImage:hover:before {
   background-image: url('https://cleansolace.github.io/mobilegem/fred/assets/img/services/ptg.jpg');
-  height: fit-content;
-  width: fit-content;
+  background-size: 300px 320px;
+  background-repeat: no-repeat;
 }
 
 .secondImage:hover:before {
   background-image: url("https://cleansolace.github.io/mobilegem/fred/assets/img/services/par.jpg");
-  height: fit-content;
-  width: fit-content;
+  background-size: 300px 320px;
+  background-repeat: no-repeat;
 }
 
 .threeImage:hover:before {
   background-image: url("https://cleansolace.github.io/mobilegem/fred/assets/img/services/vdg.jpg");
-  height: fit-content;
-  width: fit-content;
+  background-size: 300px 320px;
+  background-repeat: no-repeat;
 }
 
 
 .fourImage:hover:before {
   background-image: url("https://cleansolace.github.io/mobilegem/fred/assets/img/services/edt.jpg");
-  height: fit-content;
-  width: fit-content;
+  background-size: 300px 320px;
+  background-repeat: no-repeat;
 }
 
 
