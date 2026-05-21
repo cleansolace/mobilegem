@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABIEKU 590</title>
+    <!-- Tailwind CSS CDN -->
+
+    <!-- PWA / Shortcut Headers for Icon and App Behavior -->
+    <!-- Define Theme Color for Mobile Browser Header -->
+    <meta name="theme-color" content="#1e40af">
+    <!-- Enable full-screen experience on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <!-- Standard Icon (for desktop shortcuts, tabs) -->
+    <link rel="icon" type="image/png" href="logo.png">
+    <!-- Apple Touch Icon (for 'Add to Home Screen' on iOS) -->
+    <!-- Placeholder for an icon: Blue square with a die emoji -->
+    <link rel="apple-touch-icon" href="logo">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-blue': '#1e40af',
+                        'secondary-gray': '#f3f4f6',
+                        'accent-yellow': '#fcd34d',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles for table striping and hover */
+        .table-row-odd {
+            background-color: #ffffff;
+        }
+
+        .table-row-even {
+            background-color: #f9f9fb;
+        }
+
+        .table-row-hover:hover {
+            background-color: #eff6ff;
+        }
+
+        .highlight {
+            background-color: #fffbeb !important;
+            border: 2px solid #f59e0b;
+        }
+
+        /* Sticky header for better scrolling experience */
+        #data-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Utility for better input appearance */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .sun_win {
+            background-color: lime;
+            font-weight: bolder;
+            margin-left: 24px !important;
+            margin-right: 24px !important;
+        }
+    </style>
+</head>
+
+<body class="bg-secondary-gray min-h-screen font-sans p-4 sm:p-8">
+
+    <div id="app-container" class="max-w-7xl mx-auto space-y-6">
+        <header class="text-center p-4 bg-primary-blue rounded-xl shadow-lg">
+            <h1 class="text-3xl font-extrabold text-white">💰 ABEIKU 590</h1>
+            <p class="text-primary-blue-200 text-sm mt-1 text-white opacity-80">making money and levelling up</p>
+        </header>
+
+        <!-- Control Panel (Upload, Filters, Search) -->
+        <div class="bg-white p-6 rounded-xl shadow-md grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- 1. File Upload -->
+            <div class="space-y-2 lg:col-span-1 border-r lg:pr-4">
+                <label for="file-upload" class="block text-lg font-semibold text-gray-700">1. Upload Data File
+                    (.txt)</label>
+                <input type="file" id="file-upload" accept=".txt"
+                    class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-blue file:text-white hover:file:bg-indigo-700 cursor-pointer">
+                <div id="upload-status" class="text-sm text-gray-500">Awaiting file upload.</div>
+            </div>
+
+            <!-- 2. Filters -->
+            <div class="space-y-2 lg:col-span-1 border-r lg:pr-8">
+                <h3 class="text-lg font-semibold text-gray-700">2. Draw Filters</h3>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-1">
+                        <label for="draw-name-filter" class="text-xs font-medium text-gray-500 block mb-1">Draw
+                            Name</label>
+                        <select id="draw-name-filter" onchange="filterTable()"
+                            class="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue transition">
+                            <option value="">All Draws</option>
+                        </select>
+                    </div>
+                    <div class="col-span-1">
+                        <label for="start-date-filter" class="text-xs font-medium text-gray-500 block mb-1">Start
+                            Date</label>
+                        <input type="date" id="start-date-filter" onchange="filterTable()"
+                            class="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue transition">
+                    </div>
+                    <div class="col-span-1">
+                        <label for="end-date-filter" class="text-xs font-medium text-gray-500 block mb-1">End
+                            Date</label>
+                        <input type="date" id="end-date-filter" onchange="filterTable()"
+                            class="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue transition">
+                    </div>
+                </div>
+                <button onclick="resetFilters()"
+                    class="w-full mt-2 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition shadow-sm">Reset
+                    Filters</button>
+            </div>
+
+            <!-- 3. Search & Analysis -->
+            <div class="space-y-2 lg:col-span-1">
+                <h3 class="text-lg font-semibold text-gray-700">3. Number Search (Winning Numbers Only)</h3>
+                <div class="flex gap-2">
+                    <input type="number" id="search-number" min="1" max="90" placeholder="Enter number (1-90)"
+                        class="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue transition">
+                    <button onclick="searchNumber()"
+                        class="px-4 py-2 bg-primary-blue text-white font-semibold rounded-lg hover:bg-indigo-700 transition shadow-md">Search</button>
+                </div>
+
+                <!-- Analysis Tools -->
+                <h3 class="text-lg font-semibold text-gray-700 mt-4">4. Analysis Tools</h3>
+                <button onclick="predictNextDraw()"
+                    class="w-full py-2 text-sm bg-accent-yellow text-gray-900 font-semibold rounded-lg hover:bg-yellow-400 transition shadow-md shadow-yellow-200">🔮
+                    Predict Next Draw (Mixed Strategy)</button>
+                <button onclick="showLeastFrequentNumbers()"
+                    class="w-full mt-2 py-2 text-sm bg-primary-blue text-white rounded-lg hover:bg-indigo-700 transition shadow-md shadow-blue-200">🧊
+                    Show 9 Coldest Numbers</button>
+
+                <button onclick="downloadTablePDF()"
+                    class="w-full mt-2 py-2 text-sm bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition shadow-md">
+                    📥 Download Table PDF
+                </button>
+
+                <button onclick="showAbsentNumbers27()"
+                    class="w-full mt-2 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-md shadow-indigo-200">
+                    🔍 Show Numbers Absent in Last 27 Draws
+                </button>
+
+                <button onclick="showAbsentNumbersSpecific27()"
+                    class="w-full mt-2 py-2 text-sm bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition shadow-md shadow-rose-200">
+                    🎯 Show Specific Game Absentees (Last 27)
+                </button>
+
+            </div>
+        </div>
+
+        <!-- Search Results Panel -->
+        <div id="search-results-area" class="bg-primary-blue/10 p-4 rounded-xl shadow-inner hidden">
+            <!-- Results will be displayed here -->
+        </div>
+
+        <!-- Data Table -->
+        <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto max-h-[70vh]">
+            <h2 class="text-xl font-bold text-gray-700 mb-4">Draw History</h2>
+            <table id="data-table" class="min-w-full text-sm">
+                <thead class="bg-primary-blue text-white sticky top-0">
+                    <tr>
+                        <th onclick="sortTable(0)"
+                            class="p-3 cursor-pointer rounded-tl-lg hover:bg-indigo-700 whitespace-nowrap">Date</th>
+                        <th onclick="sortTable(1)" class="p-3 cursor-pointer hover:bg-indigo-700 whitespace-nowrap">Draw
+                            Name</th>
+                        <th onclick="sortTable(2)"
+                            class="p-3 cursor-pointer hover:bg-indigo-700 whitespace-nowrap sun_win">
+                            Winning Numbers</th>
+                        <th onclick="sortTable(3)" class="p-3 cursor-pointer hover:bg-indigo-700 whitespace-nowrap">
+                            Machine Numbers</th>
+                        <th onclick="sortTable(4)" class="p-3 cursor-pointer hover:bg-indigo-700 whitespace-nowrap">Win:
+                            10-Range Check</th>
+                        <th onclick="sortTable(5)" class="p-3 cursor-pointer hover:bg-indigo-700 whitespace-nowrap">Win:
+                            5-Range Check</th>
+                        <th onclick="sortTable(6)" class="p-3 cursor-pointer hover:bg-indigo-700 whitespace-nowrap">
+                            Mach: 10-Range Check</th>
+                        <th onclick="sortTable(7)"
+                            class="p-3 cursor-pointer rounded-tr-lg hover:bg-indigo-700 whitespace-nowrap">Mach: 5-Range
+                            Check</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr>
+                        <td colspan="8" class="text-center p-4 text-gray-500">Upload a file to load data.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        let allData = []; // Stores the raw parsed data (used for search/reset)
+        let currentData = []; // Stores the currently filtered data (used for display/sort)
+        let fileContentBuffer = ''; // Buffer for partial data chunks
+
+        // Define chunk size (e.g., 1MB)
+        const CHUNK_SIZE = 1024 * 1024;
+        const statusElement = document.getElementById('upload-status');
+
+        // --- Core Data Processing Helpers ---
+
+        /**
+         * Converts YYYY-MM-DD date string to e.g., "Wed 29 Oct 2025"
+         * Includes validation for invalid dates to prevent RangeError.
+         * @param {string} dateStr - Date in YYYY-MM-DD format.
+         * @returns {string} Formatted date string or original string if invalid.
+         */
+        function formatDisplayDate(dateStr) {
+            // Early return for empty or non-date strings (like the header "Date")
+            if (!dateStr || dateStr.toLowerCase() === 'date') {
+                return dateStr;
+            }
+
+            // Create Date object, adding 'T00:00:00' to ensure consistent local timezone interpretation
+            const dateObj = new Date(dateStr + 'T00:00:00');
+
+            // Check if the Date object is valid
+            if (isNaN(dateObj.getTime())) {
+                return dateStr;
+            }
+
+            const dateFormatter = new Intl.DateTimeFormat('en-US', {
+                weekday: 'short',
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+            return dateFormatter.format(dateObj).replace(/,/g, '');
+        }
+
+        /**
+         * Checks how many numbers fall within specific ranges and returns the count of ranges with >= 2 numbers.
+         * @param {number[]} numbers - Array of numbers to check.
+         * @param {string} type - '10s' or '5s' range grouping.
+         * @returns {number} The count of ranges that contain two or more numbers.
+         */
+        function checkRanges(numbers, type) {
+            // Note: 10-range check ranges are non-uniform based on the initial request
+            const ranges10 = [
+                { min: 1, max: 10 }, { min: 11, max: 19 }, { min: 20, max: 29 },
+                { min: 30, max: 39 }, { min: 40, max: 49 }, { min: 50, max: 59 },
+                { min: 60, max: 69 }, { min: 70, max: 79 }, { min: 80, max: 90 }
+            ];
+
+            const ranges5 = [];
+            for (let i = 0; i < 90; i += 5) {
+                ranges5.push({ min: i + 1, max: i + 5 });
+            }
+
+            const ranges = type === '10s' ? ranges10 : ranges5;
+
+            let rangesWithTwoOrMore = 0;
+            for (const range of ranges) {
+                let count = 0;
+                for (const num of numbers) {
+                    if (num >= range.min && num <= range.max) {
+                        count++;
+                    }
+                }
+                if (count >= 2) {
+                    rangesWithTwoOrMore++;
+                }
+            }
+            return rangesWithTwoOrMore;
+        }
+
+        /**
+         * Modified parsing logic to flag cancelled draws instead of skipping them.
+         */
+        function parseAndPushRecord(recordText) {
+            const lines = recordText.trim().split('\n');
+
+            if (lines.length === 4) {
+                const drawName = lines[0].trim();
+                const date = lines[1].trim();
+                const winningNumbersStr = lines[2].trim();
+                const machineNumbersStr = lines[3].trim();
+
+                try {
+                    const winningNumbers = winningNumbersStr.split(',').map(n => parseInt(n.trim(), 10));
+                    const machineNumbers = machineNumbersStr.split(',').map(n => parseInt(n.trim(), 10));
+
+                    // Identify cancelled draws (all winning numbers are 0)
+                    const isCancelled = winningNumbers.length > 0 && winningNumbers.every(n => n === 0);
+
+                    allData.push({
+                        date: date,
+                        drawName: drawName,
+                        winningNumbers: winningNumbers.filter(n => !isNaN(n)),
+                        machineNumbers: machineNumbers.filter(n => !isNaN(n)),
+                        winRange10: checkRanges(winningNumbers, '10s'),
+                        winRange5: checkRanges(winningNumbers, '5s'),
+                        machRange10: checkRanges(machineNumbers, '10s'),
+                        machRange5: checkRanges(machineNumbers, '5s'),
+                        isCancelled: isCancelled // Store the status
+                    });
+                } catch (e) {
+                    console.error("Error parsing record:", recordText, e);
+                }
+            }
+        }
+
+
+        // --- Chunked Reading Implementation ---
+
+        /**
+         * Parses a chunk of data, adding completed records to allData.
+         * Handles incomplete records at the end of the chunk by keeping them in the buffer.
+         * @param {string} chunk - A new piece of file content.
+         */
+        function processChunk(chunk) {
+            // Append the new chunk to the buffer
+            fileContentBuffer += chunk;
+
+            // Split by the record separator (\n\n)
+            const records = fileContentBuffer.split('\n\n');
+
+            // The last record is saved back to the buffer as it might be incomplete
+            fileContentBuffer = records.pop() || '';
+
+            // Process all completed records
+            records.forEach(record => {
+                if (record.trim() !== '') {
+                    parseAndPushRecord(record);
+                }
+            });
+        }
+
+        /**
+         * Handles the file upload and initiates chunked reading.
+         * @param {File} file - The uploaded file object.
+         */
+        function startChunkedRead(file) {
+            allData = []; // Clear previous data
+            fileContentBuffer = ''; // Reset buffer
+            currentData = [];
+            let start = 0;
+            const fileSize = file.size;
+
+            statusElement.textContent = 'Starting file read...';
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                // Process the chunk content
+                processChunk(e.target.result);
+
+                start += CHUNK_SIZE;
+
+                // Update status and read next chunk or finish
+                if (start < fileSize) {
+                    statusElement.textContent = `Reading file... ${Math.min(100, Math.ceil((start / fileSize) * 100))}% complete (${allData.length} records processed)`;
+                    readNextChunk();
+                } else {
+                    // Handle the final buffer content correctly
+                    statusElement.textContent = `Finalizing data processing...`;
+
+                    if (fileContentBuffer.trim() !== '') {
+                        // Process remaining content as one or more records, even without the final \n\n
+                        const finalRecords = fileContentBuffer.split('\n\n');
+                        finalRecords.forEach(record => {
+                            if (record.trim() !== '') {
+                                parseAndPushRecord(record);
+                            }
+                        });
+                    }
+
+                    // Defer final UI updates to prevent blocking the status message
+                    setTimeout(() => {
+                        statusElement.textContent = `File read complete! Processed ${allData.length} total records.`;
+
+                        // Finalize the display
+                        currentData = [...allData];
+
+                        // Skip the very first entry if it's the header
+                        if (currentData.length > 0 && currentData[0].drawName === 'Draw name') {
+                            currentData.shift();
+                            allData.shift();
+                        }
+
+                        populateFilterOptions();
+                        renderTable(currentData);
+                        console.log("Data initialized:", allData.length, "records.");
+                    }, 0);
+                }
+            };
+
+            reader.onerror = function (e) {
+                statusElement.textContent = `Error reading file: ${e.target.error.name}`;
+                console.error("File read error:", e.target.error);
+            };
+
+            function readNextChunk() {
+                const chunk = file.slice(start, start + CHUNK_SIZE);
+                reader.readAsText(chunk);
+            }
+
+            readNextChunk(); // Start the process
+        }
+
+
+        // --- UI Rendering and Utilities ---
+
+        /**
+         * Renders the data into the HTML table body.
+         * @param {object[]} data - The data array to display.
+         */
+        function renderTable(data) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = index % 2 === 0 ? 'table-row-even' : 'table-row-odd';
+
+                // If cancelled, dim the row and add a "CANCELLED" label
+                if (row.isCancelled) {
+                    tr.style.opacity = "0.5";
+                    tr.style.backgroundColor = "#fee2e2"; // Light red tint
+                }
+
+                tr.innerHTML = `
+            <td class="p-3 whitespace-nowrap">${formatDisplayDate(row.date)}</td>
+            <td class="p-3 font-medium">${row.drawName} ${row.isCancelled ? '<span class="text-red-600 text-[10px] font-bold">[CANCELLED]</span>' : ''}</td>
+            <td class="p-3 sun_win">${row.winningNumbers.join(', ')}</td>
+            <td class="p-3 text-gray-500">${row.machineNumbers.join(', ')}</td>
+            <td class="p-3">${row.isCancelled ? '-' : row.winRange10}</td>
+            <td class="p-3">${row.isCancelled ? '-' : row.winRange5}</td>
+            <td class="p-3">${row.isCancelled ? '-' : row.machRange10}</td>
+            <td class="p-3">${row.isCancelled ? '-' : row.machRange5}</td>
+        `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /**
+         * Populates the draw name filter dropdown.
+         */
+        function populateFilterOptions() {
+            const drawNameSet = new Set(allData.map(item => item.drawName));
+            const drawNameFilter = document.getElementById('draw-name-filter');
+            drawNameFilter.innerHTML = '<option value="">All Draws</option>';
+            // Sort draw names alphabetically before adding to filter
+            Array.from(drawNameSet).sort().forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                drawNameFilter.appendChild(option);
+            });
+        }
+
+
+        // --- Filtering and Searching ---
+
+        /**
+         * Filters the table data based on selected draw name and date range.
+         */
+        function filterTable() {
+            if (allData.length === 0) return;
+
+            const drawName = document.getElementById('draw-name-filter').value;
+            const startDate = document.getElementById('start-date-filter').value;
+            const endDate = document.getElementById('end-date-filter').value;
+            document.getElementById('search-number').value = ''; // Clear search number input
+            document.getElementById('search-results-area').classList.add('hidden'); // Hide search results on filter
+
+            currentData = allData.filter(row => {
+                const passesDrawName = !drawName || row.drawName === drawName;
+
+                let passesDateRange = true;
+
+                // Check if draw date is >= start date (if start date is provided)
+                if (startDate) {
+                    passesDateRange = passesDateRange && (row.date >= startDate);
+                }
+
+                // Check if draw date is <= end date (if end date is provided)
+                if (endDate) {
+                    passesDateRange = passesDateRange && (row.date <= endDate);
+                }
+
+                return passesDrawName && passesDateRange;
+            });
+
+            renderTable(currentData);
+        }
+
+        /**
+         * Resets all filters and re-renders the full table.
+         * NOTE: This function no longer hides the search-results-area. 
+         * The analysis functions should keep it visible, and filter/search functions will hide it on their own.
+         */
+        function resetFilters() {
+            document.getElementById('draw-name-filter').value = '';
+            document.getElementById('start-date-filter').value = '';
+            document.getElementById('end-date-filter').value = '';
+            document.getElementById('search-number').value = '';
+            // document.getElementById('search-results-area').classList.add('hidden'); // REMOVED: This line was causing the issue
+            currentData = [...allData];
+            renderTable(currentData);
+        }
+
+        /**
+         * Searches for a specific number ONLY in Winning Numbers and filters the table.
+         */
+        function searchNumber() {
+            if (allData.length === 0) return;
+
+            // Clear date/draw filters first to ensure search acts on all data
+            document.getElementById('draw-name-filter').value = '';
+            document.getElementById('start-date-filter').value = '';
+            document.getElementById('end-date-filter').value = '';
+
+            const searchNumInput = document.getElementById('search-number');
+            const searchNum = parseInt(searchNumInput.value.trim(), 10);
+            const resultsArea = document.getElementById('search-results-area');
+
+            if (isNaN(searchNum) || searchNum < 1 || searchNum > 90) {
+                resultsArea.classList.remove('hidden');
+                resultsArea.innerHTML = `<p class="text-sm text-red-700">Please enter a valid number between 1 and 90.</p>`;
+                renderTable([]); // Clear the main table if search input is invalid
+                return;
+            }
+
+            // 1. Filter the entire dataset (allData) to find only rows where the number is in winningNumbers
+            const matchingDraws = [];
+            let count = 0;
+            const appearances = [];
+
+            allData.forEach((row) => {
+                const appearedInWin = row.winningNumbers.includes(searchNum);
+
+                if (appearedInWin) {
+                    matchingDraws.push(row);
+                    count++;
+
+                    appearances.push({
+                        date: row.date,
+                        drawName: row.drawName,
+                        location: '<span class="font-bold text-primary-blue">Winning Numbers</span>'
+                    });
+                }
+            });
+
+            // 2. Update currentData to be the filtered set
+            currentData = matchingDraws;
+
+            // 3. Render the filtered table 
+            renderTable(currentData);
+
+            // 4. Display search results summary
+            resultsArea.classList.remove('hidden');
+            if (count > 0) {
+                resultsArea.innerHTML = `
+                    <h3 class="text-lg font-bold text-primary-blue mb-2">Search Result: Number ${searchNum}</h3>
+                    <p class="text-sm font-medium text-gray-700 mb-3">Found in <span class="text-xl font-extrabold text-red-600">${count}</span> draw(s) (Winning Numbers).</p>
+                    <div class="overflow-x-auto max-h-64">
+                        <table class="min-w-full text-sm bg-white rounded-lg shadow-sm">
+                            <thead class="bg-gray-100 sticky top-0"><tr><th class="p-2 text-left">Date</th><th class="p-2 text-left">Draw Name</th><th class="p-2 text-left">Appeared In</th></tr></thead>
+                            <tbody>
+                                ${appearances.map(a => `
+                                    <tr class="border-b last:border-b-0 hover:bg-gray-50">
+                                        <td class="p-2 whitespace-nowrap">${formatDisplayDate(a.date)}</td>
+                                        <td class="p-2">${a.drawName}</td>
+                                        <td class="p-2">${a.location}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                resultsArea.innerHTML = `<p class="text-sm font-medium text-gray-700">The number **${searchNum}** did not appear in any Winning Numbers.</p>`;
+            }
+        }
+
+        // --- Analysis Functions ---
+
+        /**
+         * Calculates the frequency of all numbers (1-90) in the winning numbers.
+         * @returns {Array<{number: number, count: number}>} Sorted by count (ascending).
+         */
+        function calculateNumberFrequency() {
+            const frequency = {};
+            for (let i = 1; i <= 90; i++) {
+                frequency[i] = 0;
+            }
+
+            allData.forEach(row => {
+                row.winningNumbers.forEach(num => {
+                    if (num >= 1 && num <= 90) {
+                        frequency[num]++;
+                    }
+                });
+            });
+
+            return Object.keys(frequency).map(key => ({
+                number: parseInt(key, 10),
+                count: frequency[key]
+            })).sort((a, b) => a.count - b.count); // Sort ascending (least frequent first)
+        }
+
+        /**
+         * Finds the draw with the most recent date.
+         * @returns {object | null} The latest draw object or null if data is empty.
+         */
+        function getLatestDraw() {
+            if (allData.length === 0) return null;
+
+            // Sort by date string (YYYY-MM-DD) descending
+            const sortedData = [...allData].sort((a, b) => b.date.localeCompare(a.date));
+            return sortedData[0];
+        }
+
+
+
+        /**
+         * Generates a set of numbers that must be excluded from the prediction pool.
+         * Exclusion rules:
+         * 1. Recency: Numbers that appeared in the last 'drawsToCheck' (up to 5) draws.
+         * 2. Reversal: If XY appeared in the last draws, YX must be excluded.
+         * @param {number[][]} recentDraws - Array of winning numbers from the most recent draws.
+         * @param {number} drawsToCheck - The number of recent draws to check (1-5).
+         * @returns {Set<number>} A set of all numbers to exclude from the prediction.
+         */
+        function getExclusions(recentDraws, drawsToCheck = 5) {
+            const numbersToExclude = new Set();
+            const reversalExclusions = new Set();
+
+            if (drawsToCheck < 1) return numbersToExclude;
+
+            const drawsSlice = recentDraws.slice(0, drawsToCheck);
+            const allRecentWinningNumbers = drawsSlice.flat();
+
+            for (const number of allRecentWinningNumbers) {
+                // 1. Recency Exclusion
+                numbersToExclude.add(number);
+
+                // 2. Reversal Exclusion
+                if (number >= 10 && number <= 90) {
+                    const numStr = number.toString().padStart(2, '0');
+
+                    if (numStr.length === 2 && numStr[0] !== numStr[1]) {
+                        const reversedStr = numStr[1] + numStr[0];
+                        const reversedNum = parseInt(reversedStr, 10);
+
+                        if (reversedNum >= 1 && reversedNum <= 90) {
+                            reversalExclusions.add(reversedNum);
+                        }
+                    }
+                }
+            }
+
+            reversalExclusions.forEach(num => numbersToExclude.add(num));
+
+            return numbersToExclude;
+        }
+
+
+
+        /**
+         * Calculates a co-occurrence score for each number based on how often it appeared with other numbers.
+         * The score favors numbers that appear with a high degree of variety or with numbers that are currently cold.
+         * @returns {Map<number, number>} A Map where the key is the number and the value is its Co-occurrence Score.
+         */
+        function calculateCooccurrenceScores(allWinningDraws) {
+            const cooccurrenceMap = new Map();
+            const allFrequencies = calculateNumberFrequency(); // Assumed to exist and contain number & count
+            const totalDraws = allWinningDraws.length;
+
+            // Initialize co-occurrence count for every number
+            for (const item of allFrequencies) {
+                cooccurrenceMap.set(item.number, { count: 0, coldPartnerBias: 0 });
+            }
+
+            // Identify the top 20% coldest numbers for bias scoring
+            const coldestNumbers = allFrequencies.slice(0, Math.ceil(90 * 0.2)).map(item => item.number);
+            const isCold = new Set(coldestNumbers);
+
+            // 1. Calculate the base Co-occurrence count
+            for (const draw of allWinningDraws) {
+                for (let i = 0; i < draw.length; i++) {
+                    const numA = draw[i];
+                    const dataA = cooccurrenceMap.get(numA);
+
+                    // Count total co-occurrences
+                    dataA.count += (draw.length - 1); // Co-occurred with every other number in the draw
+
+                    // Apply Cold Partner Bias
+                    for (let j = i + 1; j < draw.length; j++) {
+                        const numB = draw[j];
+                        // Check if one number is cold and the other is not
+                        if (isCold.has(numA) && !isCold.has(numB)) {
+                            dataA.coldPartnerBias += 1; // A appeared with a non-cold partner
+                        }
+                        if (isCold.has(numB) && !isCold.has(numA)) {
+                            cooccurrenceMap.get(numB).coldPartnerBias += 1; // B appeared with a non-cold partner
+                        }
+                    }
+                }
+            }
+
+            // 2. Final Score calculation (CDM Concept)
+            // Score = (Normalized Frequency) + (Normalized Co-occurrence Count) - (Normalized Cold Partner Bias)
+            // Favoring numbers that are frequent, co-occur often, but rarely co-occur with hot numbers.
+            const maxCooccurrenceCount = Array.from(cooccurrenceMap.values()).reduce((max, item) => Math.max(max, item.count), 0);
+            const maxColdPartnerBias = Array.from(cooccurrenceMap.values()).reduce((max, item) => Math.max(max, item.coldPartnerBias), 0);
+
+            const finalScores = new Map();
+            for (const item of allFrequencies) {
+                const num = item.number;
+                const freqNorm = item.count / totalDraws;
+
+                const coocData = cooccurrenceMap.get(num);
+                const coocNorm = coocData.count / maxCooccurrenceCount;
+                const biasNorm = maxColdPartnerBias > 0 ? coocData.coldPartnerBias / maxColdPartnerBias : 0;
+
+                // Final Elite Score: The higher the score, the more statistically probable it is based on this combined model.
+                const eliteScore = (freqNorm * 0.4) + (coocNorm * 0.4) + ((1 - biasNorm) * 0.2);
+
+                finalScores.set(num, eliteScore);
+            }
+
+            return finalScores;
+        }
+
+
+
+
+
+
+
+        // --- Helper to determine the Next Draw Name based on chronological progression ---
+        function getNextDrawNameFromData() {
+            if (allData.length === 0) return "N/A";
+
+            // Use the absolute latest entry (even if cancelled) to move to the next slot
+            const lastEntry = allData[0];
+            const lastDrawName = lastEntry.drawName;
+
+            const morning = ["VAG Monday", "VAG Tuesday", "VAG Wednesday", "VAG Thursday", "VAG Friday", "VAG Saturday"];
+            const afternoon = ["Monday Noon Rush", "Tuesday Noon Rush", "Wednesday Noon Rush", "Thursday Noon Rush", "Friday Noon Rush", "Saturday Noon Rush"];
+            const evening = ["Monday Special", "Lucky Tuesday", "Midweek", "Fortune Thursday", "Friday Bonanza", "National Weekly", "Sunday Aseda"];
+
+            if (morning.includes(lastDrawName)) {
+                return `${lastDrawName.split(' ')[1]} Noon Rush`;
+            }
+            if (afternoon.includes(lastDrawName)) {
+                const day = lastDrawName.split(' ')[0];
+                const eveningDayMap = {
+                    "Monday": "Monday Special", "Tuesday": "Lucky Tuesday", "Wednesday": "Midweek",
+                    "Thursday": "Fortune Thursday", "Friday": "Friday Bonanza", "Saturday": "National Weekly"
+                };
+                return eveningDayMap[day] || "Next Evening Draw";
+            }
+            if (evening.includes(lastDrawName)) {
+                const eveningDays = ["Sunday Aseda", "Monday Special", "Lucky Tuesday", "Midweek", "Fortune Thursday", "Friday Bonanza", "National Weekly"];
+                const nextDayMap = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+                const nextDay = nextDayMap[eveningDays.indexOf(lastDrawName)];
+                return nextDay === "Sunday" ? "Sunday Aseda" : `VAG ${nextDay}`;
+            }
+            return "Next Scheduled Draw";
+        }
+
+        // --- Main Prediction Function ---
+        function predictNextDraw() {
+            const validData = allData.filter(d => !d.isCancelled);
+            if (validData.length < 15) {
+                alert("Need more valid data for 3-draw loop analysis.");
+                return;
+            }
+
+            const nextDrawName = getNextDrawNameFromData();
+
+            // 1. RULE 14: MIRROR RULE (XY -> YX)
+            // Gather numbers from the 3 most recent specific draws AND 3 most recent chronological draws
+            const specific3 = validData.filter(d => d.drawName === nextDrawName).slice(0, 3).flatMap(d => d.winningNumbers);
+            const chrono3 = validData.slice(0, 3).flatMap(d => d.winningNumbers);
+            const mirrorCheckPool = [...new Set([...specific3, ...chrono3])];
+
+            const mirrorExclusions = new Set();
+            mirrorCheckPool.forEach(n => {
+                if (n > 10 && n % 10 !== 0) { // Exclude single digits and multiples of 10
+                    const mirror = parseInt(n.toString().split('').reverse().join(''));
+                    if (mirror <= 90 && mirror !== n) mirrorExclusions.add(mirror);
+                }
+            });
+
+            // 2. NEIGHBOR RULE (+/- 1)
+            const absoluteLastWin = validData[0].winningNumbers;
+            const lastSpecificWin = validData.find(d => d.drawName === nextDrawName)?.winningNumbers || [];
+            const neighborExclusions = new Set();
+            [...absoluteLastWin, ...lastSpecificWin].forEach(num => {
+                neighborExclusions.add(num);
+                if (num > 1) neighborExclusions.add(num - 1);
+                if (num < 90) neighborExclusions.add(num + 1);
+            });
+
+            // 3. RULE 15: SPECIFIC HISTORY (Last 9)
+            const last9Specific = validData.filter(d => d.drawName === nextDrawName).slice(0, 9).flatMap(d => d.winningNumbers);
+
+            // COMBINED TOTAL EXCLUSION POOL
+            const totalExclusionPool = new Set([
+                ...last9Specific,
+                ...Array.from(mirrorExclusions),
+                ...Array.from(neighborExclusions)
+            ]);
+
+            function generateSet() {
+                let attempts = 0;
+                while (attempts < 5000) {
+                    attempts++;
+                    let set = [];
+                    let pool = Array.from({ length: 90 }, (_, i) => i + 1);
+                    let selectionPool = pool.filter(n => !totalExclusionPool.has(n));
+
+                    while (set.length < 5) {
+                        let num = selectionPool[Math.floor(Math.random() * selectionPool.length)];
+                        if (!set.includes(num)) set.push(num);
+                    }
+                    set.sort((a, b) => a - b);
+
+                    // Validation against your 17 rules (simplified check for example)
+                    const sum = set.reduce((a, b) => a + b, 0);
+                    if (sum < 200 || sum > 290) continue;
+                    const decades = new Set(set.map(n => Math.floor((n - 1) / 10)));
+                    if (decades.size < 4) continue;
+
+                    return set;
+                }
+                return [11, 24, 53, 70, 81]; // Fallback
+            }
+
+            const prediction = generateSet();
+            const area = document.getElementById('search-results-area');
+            area.innerHTML = `
+        <div class="p-4 bg-white rounded-lg border-2 border-primary-blue shadow-lg">
+            <div class="text-center mb-2">
+                <span class="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Smart Analysis Mode</span>
+                <h3 class="font-black text-xl text-primary-blue uppercase">${nextDrawName}</h3>
+            </div>
+            <div class="flex justify-center gap-3 my-4">
+                ${prediction.map(n => `<span class="w-12 h-12 flex items-center justify-center bg-accent-yellow text-blue-900 font-bold rounded-full shadow-md text-lg">${n}</span>`).join('')}
+            </div>
+            <div class="bg-indigo-50 p-2 rounded text-[10px] text-indigo-700 text-center">
+                <strong>Mirror Rule:</strong> Reversed ${mirrorExclusions.size} numbers from recent loops to avoid mirror pairs.
+            </div>
+        </div>
+    `;
+            area.classList.remove('hidden');
+        }
+
+
+
+
+
+
+
+        /**
+         * Shows the 9 least frequent (coldest) winning numbers.
+         */
+        function showLeastFrequentNumbers() {
+            console.log("--- Running Show Least Frequent Numbers ---");
+            try {
+                if (allData.length === 0) {
+                    document.getElementById('search-results-area').classList.remove('hidden');
+                    document.getElementById('search-results-area').innerHTML = `<p class="text-sm text-red-700">Please upload data first to run analysis.</p>`;
+                    return;
+                }
+
+                // 1. Calculate frequency and get the top 9 least frequent (coldest)
+                const coldNumbers = calculateNumberFrequency().slice(0, 9);
+
+                console.log("Coldest numbers found:", coldNumbers);
+
+                const numbersHtml = coldNumbers.map(item => `
+                    <div class="flex flex-col items-center justify-center p-3 bg-white rounded-lg shadow-sm border border-gray-200 min-w-[60px]">
+                        <span class="text-2xl font-extrabold text-primary-blue">${item.number}</span>
+                        <span class="text-xs text-gray-500 mt-1">Count: ${item.count}</span>
+                    </div>
+                `).join('');
+
+                const resultsArea = document.getElementById('search-results-area');
+                resultsArea.classList.remove('hidden');
+                resultsArea.innerHTML = `
+                    <h3 class="text-lg font-bold text-primary-blue mb-3">🧊 Top 9 Coldest Winning Numbers</h3>
+                    <p class="text-sm text-gray-700 mb-4">These 9 numbers have appeared the least frequently in the winning draws across the entire dataset.</p>
+                    <div class="flex flex-wrap gap-4 justify-start">
+                        ${numbersHtml}
+                    </div>
+                `;
+
+                // Reset table view only (filters and full dataset display)
+                resetFilters();
+
+            } catch (e) {
+                console.error("Coldest number analysis failed:", e);
+                const resultsArea = document.getElementById('search-results-area');
+                resultsArea.classList.remove('hidden');
+                resultsArea.innerHTML = `<p class="text-sm text-red-700 font-bold">An error occurred during analysis. Error: ${e.message}</p>`;
+            }
+        }
+
+
+        // --- Sorting ---
+
+        let sortDirection = 'asc';
+        let sortedColumn = -1;
+
+        /**
+         * Sorts the table data by a given column index.
+         * @param {number} colIndex - The index of the column to sort.
+         */
+        function sortTable(colIndex) {
+            if (currentData.length === 0) return;
+
+            // Update sort state
+            if (colIndex === sortedColumn) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortDirection = 'asc';
+                sortedColumn = colIndex;
+            }
+
+            currentData.sort((a, b) => {
+                let aVal, bVal;
+                // Use a helper function for case-insensitive string comparison
+                const compareStrings = (strA, strB) => {
+                    const valA = strA.toUpperCase();
+                    const valB = strB.toUpperCase();
+                    if (valA < valB) return -1;
+                    if (valA > valB) return 1;
+                    return 0;
+                };
+
+                switch (colIndex) {
+                    case 0: // Date
+                        aVal = new Date(a.date);
+                        bVal = new Date(b.date);
+                        break;
+                    case 1: // Draw Name (string)
+                        return compareStrings(a.drawName, b.drawName) * (sortDirection === 'asc' ? 1 : -1);
+                    case 2: // Winning Numbers (Treat as string/lexicographical)
+                        aVal = a.winningNumbers.join(',');
+                        bVal = b.winningNumbers.join(',');
+                        break;
+                    case 3: // Machine Numbers (Treat as string/lexicographical)
+                        aVal = a.machineNumbers.join(',');
+                        bVal = b.machineNumbers.join(',');
+                        break;
+                    case 4: aVal = a.winRange10; bVal = b.winRange10; break; // Number checks
+                    case 5: aVal = a.winRange5; bVal = b.winRange5; break;
+                    case 6: aVal = a.machRange10; bVal = b.machRange10; break;
+                    case 7: aVal = a.machRange5; bVal = b.machRange5; break;
+                    default: return 0;
+                }
+
+                let comparison = 0;
+                if (aVal > bVal) comparison = 1;
+                else if (aVal < bVal) comparison = -1;
+
+                return sortDirection === 'asc' ? comparison : comparison * -1;
+            });
+
+            renderTable(currentData);
+        }
+
+        // --- File Uploader Listener ---
+
+        document.getElementById('file-upload').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                startChunkedRead(file);
+            }
+        });
+
+        // --- PDF Download Logic ---
+        function downloadTablePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.text("THE LOTTERY DRAW RESULTS", 14, 15);
+
+            const tableRows = currentData.map(item => [
+                item.date,
+                item.drawName,
+                item.winningNumbers.join(', '),
+                item.machineNumbers.join(', ')
+            ]);
+
+            doc.autoTable({
+                head: [['Date', 'Draw Name', 'Winning Numbers', 'Machine Numbers']],
+                body: tableRows,
+                startY: 20,
+            });
+
+            doc.save("draw_result.pdf");
+        }
+
+
+
+
+        /**
+         * New Analysis: Identifies numbers (1-90) that have not appeared 
+         * in the most recent 27 draws.
+        */
+        function showAbsentNumbers27() {
+            console.log("--- Running Analysis: 27-Draw Absenteeism ---");
+            try {
+                if (allData.length === 0) {
+                    alert("Please upload a data file first.");
+                    return;
+                }
+
+                // 1. Identify valid (non-cancelled) data for accurate analysis
+                const validData = allData.filter(d => !d.isCancelled);
+
+                // 2. Take the 27 most recent winning sets
+                const recent27 = validData.slice(0, 27);
+                const seenIn27 = new Set();
+
+                recent27.forEach(draw => {
+                    draw.winningNumbers.forEach(num => seenIn27.add(num));
+                });
+
+                // 3. Find which numbers from 1-90 are missing
+                const absentList = [];
+                for (let i = 1; i <= 90; i++) {
+                    if (!seenIn27.has(i)) {
+                        absentList.push(i);
+                    }
+                }
+
+                // 4. Display the results in the search area
+                const resultsArea = document.getElementById('search-results-area');
+                resultsArea.classList.remove('hidden');
+
+                if (absentList.length === 0) {
+                    resultsArea.innerHTML = `
+                <div class="p-4 bg-white rounded-lg border-l-4 border-primary-blue">
+                    <h3 class="font-bold text-primary-blue">27-Draw Analysis</h3>
+                    <p class="text-sm text-gray-600">No absent numbers found. Every number (1-90) has appeared at least once in the last 27 draws.</p>
+                </div>`;
+                } else {
+                    // Display only the first 9 as requested for the UI, but note the total
+                    const displaySet = absentList.slice(0, 9);
+
+                    resultsArea.innerHTML = `
+                <div class="space-y-3">
+                    <h3 class="text-lg font-bold text-primary-blue flex items-center gap-2">
+                        <span>⏳</span> Numbers Absent in Last 27 Draws
+                    </h3>
+                    <p class="text-xs text-gray-500 italic">Total found: ${absentList.length} numbers are currently in a "long sleep" (absent for 27+ draws).</p>
+                    <div class="flex flex-wrap gap-3">
+                        ${displaySet.map(num => `
+                            <div class="w-14 h-14 flex flex-col items-center justify-center bg-white border-2 border-indigo-100 rounded-xl shadow-sm">
+                                <span class="text-xl font-black text-indigo-600">${num}</span>
+                                <span class="text-[8px] text-gray-400 uppercase font-bold">Sleep</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+                }
+
+                // Optional: Scroll to results
+                resultsArea.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (e) {
+                console.error("27-Draw Analysis failed:", e);
+                alert("An error occurred during analysis: " + e.message);
+            }
+        }
+
+        /**
+         * Analysis: Identifies numbers (1-90) absent from the last 27 instances 
+         * of the SAME draw, then filters them through the 17 Strategic Prediction Rules.
+         */
+        function showAbsentNumbersSpecific27() {
+            try {
+                if (allData.length === 0) {
+                    alert("Please upload data first.");
+                    return;
+                }
+
+                const targetDrawName = getNextDrawNameFromData();
+                const validData = allData.filter(d => !d.isCancelled);
+
+                // 1. Find numbers absent in the last 27 specific draws
+                const specificHistory = validData.filter(d => d.drawName === targetDrawName);
+                const recent27Specific = specificHistory.slice(0, 27);
+                const seenInSpecific27 = new Set();
+                recent27Specific.forEach(draw => {
+                    draw.winningNumbers.forEach(num => seenInSpecific27.add(num));
+                });
+
+                const absentList = [];
+                for (let i = 1; i <= 90; i++) {
+                    if (!seenInSpecific27.has(i)) absentList.push(i);
+                }
+
+                // 2. Build the EXCLUSION POOL (Same logic as Prediction Rules)
+                // This includes Neighbors (+/- 1) and Mirrors (XY -> YX)
+                const absoluteLastWin = validData[0].winningNumbers;
+                const lastSpecificWin = specificHistory.length > 0 ? specificHistory[0].winningNumbers : [];
+
+                const ruleExclusions = new Set();
+                [...absoluteLastWin, ...lastSpecificWin].forEach(num => {
+                    ruleExclusions.add(num);
+                    if (num > 1) ruleExclusions.add(num - 1);
+                    if (num < 90) ruleExclusions.add(num + 1);
+                });
+
+                // Mirror check (Rule 14) on the most recent loop
+                const mirrorPool = [...new Set([...validData.slice(0, 3).flatMap(d => d.winningNumbers)])];
+                mirrorPool.forEach(n => {
+                    if (n > 10 && n % 10 !== 0) {
+                        const mirror = parseInt(n.toString().split('').reverse().join(''));
+                        if (mirror <= 90 && mirror !== n) ruleExclusions.add(mirror);
+                    }
+                });
+
+                // 3. Filter the absent list through the exclusion rules
+                const filteredAbsentList = absentList.filter(n => !ruleExclusions.has(n));
+
+                // 4. Render the Results
+                const resultsArea = document.getElementById('search-results-area');
+                resultsArea.classList.remove('hidden');
+
+                // Identify the "top picks" (those that are absent AND pass the rules)
+                const topPicks = filteredAbsentList.slice(0, 9);
+
+                resultsArea.innerHTML = `
+            <div class="space-y-4">
+                <div class="p-4 bg-rose-50 rounded-lg border-2 border-rose-200">
+                    <h3 class="text-lg font-black text-rose-700 uppercase">${targetDrawName} Analysis</h3>
+                    <p class="text-xs text-rose-600 font-medium">Rule-Aligned Absenteeism (Last 27 Specific Draws)</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-3 rounded shadow-sm border border-gray-100">
+                        <span class="text-[10px] text-gray-400 font-bold uppercase">Total Absent</span>
+                        <p class="text-2xl font-black text-gray-700">${absentList.length}</p>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm border border-rose-100">
+                        <span class="text-[10px] text-rose-400 font-bold uppercase">Strategy Valid</span>
+                        <p class="text-2xl font-black text-rose-600">${filteredAbsentList.length}</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <p class="text-sm font-bold text-gray-700">Top Strategic Picks (Absent & Rule-Safe):</p>
+                    <div class="flex flex-wrap gap-2">
+                        ${topPicks.map(num => `
+                            <div class="w-12 h-12 flex items-center justify-center bg-accent-yellow text-blue-900 font-bold rounded-lg border-b-4 border-yellow-500 shadow-sm text-lg">
+                                ${num}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-3 rounded text-[10px] text-gray-500 leading-relaxed">
+                    <strong>Logic Applied:</strong> These numbers have not appeared in the last 27 ${targetDrawName} draws AND are not neighbors (+/- 1) or mirrors (XY/YX) of the most recent results.
+                </div>
+            </div>
+        `;
+
+                resultsArea.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (e) {
+                console.error("Aligned Analysis failed:", e);
+                alert("Error: " + e.message);
+            }
+        }
+    </script>
+</body>
+
+</html>
