@@ -1,9 +1,14 @@
-Monday Noon Rush
+National Weekly
+2026-06-06
+27,77,16,82,51
+79,66,3,71,45
+
+Saturday Noon Rush
 2026-06-06
 45,37,25,72,73
 46,38,18,79,62
 
-VAG Monday
+VAG Saturday
 2026-06-06
 44,33,53,65,2
 3,46,30,57,69
